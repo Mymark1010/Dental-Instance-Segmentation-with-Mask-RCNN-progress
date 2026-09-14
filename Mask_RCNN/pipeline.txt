@@ -1,0 +1,48 @@
+#(N, W, H): N vector, mỗi vector có kích thước W*H
+Backbone resnet50
+input: Data là các ảnh cần chuyển về dạng tensor (H*W*D) (kích thước đáp ứng yêu cầu đầu vào của resnet50 finetune 224*224*3 cho ảnh màu)
+output: các feature vector (tại 1 vị trí (i, j)) ghép tất cả các feature vector mình có thì sẽ tạo thành 1 feature map kích thuosc(h*w*c) c: channel 
+số kênh của output -> là một tensor 3 chiều 
+
+RPN:
+input: các feature map tensor 3 chiều từ fpn
+output: 
+    trước NMS: + các giá trị Anchor score (N anchors) thể hiện khả năng chứa vật thể trong anchor đó (%)
+               + 4 giá trị điều chỉnh (lệch - offset) mỗi anchor (N anchors): (tx, ty, tw, th)
+    after NMS: tọa độ của các proposal sau khi đã lọc (N_proposals): (x1, y1, x2, y2) (trên trái-dưới phải)
+
+Roi align:
+input:
+    + các feature maps từ fpn tensor 3 chiều(C, H, W)
+    + output của rpn sau nms: tọa độ các proposal [[x1, y1, x2, y2],[x1', y1', x2', y2']...]
+output:
+    + nhánh bbox và class: (N, C, pool_w, pool_h) (thường là pool_h=pool_w=7) N là số proposal, C số channel feature map
+    + nhánh mask: (N, C, pool_w, pool_h) (thường là pool_h=pool_w=14|28) ví dụ (3, 256, 14, 14) (n vùng roi, mỗi vùng roi được biểu diễn bởi c channels, mỗi channels có kích thước h*w)
+
+Bbox head (classification và BBox Regression):
+input:
+    + output của roi align (N, C, W, H): được flatten thành (N, C*W*H) -> N rois, mỗi roi là 1 vector có kích thước V = C*W*H
+output:
+    + nhánh classification: (N, L) L là số labels, N số rois, tại mỗi roi là 1 vector có kích thước L - mỗi giá trị trong vector là xác suất của vật thể tại rois đó thuộc về lớp tại vị trí đó 
+                                                        ví dụ: rois 1 (chứa vật thể A): xác suất A thuộc vào các lớp tương ứng là: [0.01, 0.05, 0.72, 0.03, ..., 0.01] 
+    + nhánh BBox Regression: (N, L*4) L là số labels, N số rois, tại mỗi roi là 1 vector có kích thước L*4 -  cứ 4 giá trị liên tiếp trong vector thể hiện 4 tọa độ offset của 1 bounding box
+
+Mask head:
+input: output của roi align (N, C, W, H)
+output: (N, L, W, H) N số rois, L là số labels cũng đồng thời là số mask, nhưng ta chỉ chọn mask gắn với class dự đoán ()
+            ví dụ: mask_i = masks(i, class_id[i], :, :) sau khi áp dụng softmax mang giá trị là soft probability (giá trị từ 0->1) => resize ảnh + threshold tạo ra mask nhị phân
+                   mask_1 = masks(1, 5, :, :) roi1 có label predict là 5 -> tạo ảnh nhị phân tương ứng có kích thước w*h
+                   mask_2 = masks(2, 11, :, :) roi2 có label predict là 11 -> tạo ảnh nhị phân tương ứng
+
+Block pipeline:
+1.
+transform
+box_ops
+utils
+2.
+box_ops + utils -> rpn
+utils -> pooler 
+3.
+pooler + utils + box_ops -> roi_heads
+4.
+transform + box_ops + utils + rpn + pooler + roi_heads -> mask_rcnn

@@ -1,0 +1,31 @@
+# ---- Ignore dataset and outputs ----
+data/
+outputs/
+runs/
+checkpoints/
+test.py
+.python-version
+pyproject.toml
+uv.lock
+*.pth
+*.pt
+*.ckpt
+*.json
+*.zip
+*.tar
+*.h5
+*.npy
+*.npz
+
+# ---- Python cache ----
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# ---- VSCode settings ----
+.vscode/
+
+# ---- System files ----
+.DS_Store
+Thumbs.db

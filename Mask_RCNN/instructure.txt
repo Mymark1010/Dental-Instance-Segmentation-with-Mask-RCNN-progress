@@ -1,0 +1,53 @@
+Check phiên bản git:
+    git --version
+Khởi tạo Git (nếu chưa có)
+Mở terminal trong VS Code (Ctrl + ~) và gõ:
+    git init
+Kết nối với GitHub repo
+Mở terminal
+    git remote add origin https://github.com/username/...
+Thêm file để commit
+thêm tất cả file sửa đổi:
+    git add .
+thêm file chỉ định (1 vài file) sửa đổi:
+    Mở tab Source Control (Ctrl+Shift+G) -> nhấn nút "+" ở file muốn commit -> 
+        -> thêm "message" nếu cần thiết -> push lên githut qua các lệnh như: git branch -M main/git push -u origin main. Hoặc trong tab Source Control, nhấn nút “Sync Changes” hoặc “Push”
+Commit thay đổi: 
+    git commit -m "Message"
+Push lên github:
+    git branch -M main
+    git push -u origin main
+(
+    Mỗi lần chỉnh sửa, chỉ cần:
+        git add .
+        git commit -m "update"
+        git push
+)
+Kiểm tra trạng thái repo:
+    git status
+Đưa dữ liệu về máy: 
+    git pull
+Muốn bỏ merge khi pull:
+    git merge --abort
+Kiểm tra repo github đang được liên Kết
+    git remote -v
+Ngắt liên kết file với git
+    git remote remove origin
+Kết nổi lại repo
+    git remote add origin https://github.com/Cheetah-lhp/Segmentation-Teeth-by-Simple-Mask-R-CNN
+Push lên branch phụ
+    git push -u origin progress (thay progress bằng tên branch)
+
+Clone dự án về
+    B1: git clone --filter=blob:none --no-checkout https://github.com/Cheetah-lhp/Segmentation-Teeth-by-Simple-Mask-R-CNN.git
+    B2: cd Segmentation-Teeth-by-Simple-Mask-R-CNN
+    B3: git lfs install --skip-smudge
+    B4: git checkout main
+    B5: Vào từng file rồi tải file data raw về 
+    B6: Tự thêm file data vào
+
+Cài đặt anaconda
+    - Kiểm tra danh sách environment: conda env list
+    - Tạo environment mới: conda create --name [tên environment] --clone base
+    - Kích hoạt environment: conda activate [tên environment]
+    
